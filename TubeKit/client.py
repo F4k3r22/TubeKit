@@ -2,6 +2,7 @@ import requests
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
+from isodate import parse_duration
 
 @dataclass
 class VideoInfo:
@@ -12,9 +13,25 @@ class VideoInfo:
     channel_id: str
     thumbnail_url: str
     published_at: datetime
-    duration: str = ""
+    duration_: str = ""
     view_count: str = "0"
     like_count: str = "0"
+    embed_html_: str = ""
+
+    @property
+    def watch_url(self) -> str:
+        """Returns the direct URL to view the video on YouTube"""
+        return f"https://www.youtube.com/watch?v={self.id}"
+    
+    @property
+    def duration(self) -> str:
+        """Returns the duration of the video in HH:MM:SS format"""
+        return str(parse_duration(self.duration_)).split("T")[-1]
+    
+    @property
+    def embed_html(self, width: int = 640, height: int = 360) -> str:
+        """Generates the HTML code to embed the video"""
+        return f'<iframe width="{width}" height="{height}" src="https://www.youtube.com/embed/{self.id}" frameborder="0" allowfullscreen></iframe>'
 
 class YouTubeClient:
 
@@ -98,9 +115,10 @@ class YouTubeClient:
                     channel_id=item["snippet"]["channelId"],
                     thumbnail_url=item["snippet"]["thumbnails"]["high"]["url"],
                     published_at=datetime.fromisoformat(item["snippet"]["publishedAt"].replace('Z', '+00:00')),
-                    duration=item["contentDetails"]["duration"],
+                    duration_=item["contentDetails"]["duration"],
                     view_count=item["statistics"].get("viewCount", "0"),
-                    like_count=item["statistics"].get("likeCount", "0")
+                    like_count=item["statistics"].get("likeCount", "0"),
+                    embed_html_=item.get("player", {}).get("embedHtml", "")
                 )
                 videos.append(video)
                 
@@ -135,7 +153,8 @@ class YouTubeClient:
             channel_id=item["snippet"]["channelId"],
             thumbnail_url=item["snippet"]["thumbnails"]["high"]["url"],
             published_at=datetime.fromisoformat(item["snippet"]["publishedAt"].replace('Z', '+00:00')),
-            duration=item["contentDetails"]["duration"],
+            duration_=item["contentDetails"]["duration"],
             view_count=item["statistics"].get("viewCount", "0"),
-            like_count=item["statistics"].get("likeCount", "0")
+            like_count=item["statistics"].get("likeCount", "0"),
+            embed_html_=item.get("player", {}).get("embedHtml", "")
         )

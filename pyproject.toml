@@ -1,6 +1,6 @@
 [project]
 name = "TubeKit"
-version = "0.1.0"
+version = "0.1.5"
 description = " A simple Client API for YouTube"
 authors = [
     { name = "F4k3r22/Fredy Rivera", email = "riveraaai200678@gmail.com" }
@@ -8,6 +8,7 @@ authors = [
 requires-python = ">=3.8"
 dependencies = [
     "requests",
+    "isodate",
 ]
 
 [build-system]
